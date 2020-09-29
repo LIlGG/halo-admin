@@ -12,7 +12,8 @@ import {
   DEFAULT_CONTENT_WIDTH_TYPE,
   USER,
   API_URL,
-  OPTIONS
+  OPTIONS,
+  POST_TO_STAGE
 } from '@/store/mutation-types'
 import config from '@/config/defaultSettings'
 
@@ -29,5 +30,6 @@ export default function Initializer() {
   store.commit('SET_USER', Vue.ls.get(USER))
   store.commit('SET_API_URL', Vue.ls.get(API_URL))
   store.commit('SET_OPTIONS', Vue.ls.get(OPTIONS))
+  store.commit('SET_POST_TO_STAGE', Vue.ls.get(POST_TO_STAGE))
   // last step
 }

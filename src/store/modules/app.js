@@ -9,7 +9,8 @@ import {
   DEFAULT_FIXED_HEADER_HIDDEN,
   DEFAULT_CONTENT_WIDTH_TYPE,
   API_URL,
-  LAYOUT_SETTING
+  LAYOUT_SETTING,
+  POST_TO_STAGE
 } from '@/store/mutation-types'
 
 const app = {
@@ -25,7 +26,8 @@ const app = {
     color: null,
     apiUrl: null,
     layoutSetting: false,
-    loginModal: false
+    loginModal: false,
+    postToStage: ''
   },
   mutations: {
     SET_API_URL: (state, apiUrl) => {
@@ -82,7 +84,15 @@ const app = {
     },
     TOGGLE_LOGIN_MODAL: (state, show) => {
       state.loginModal = show
-    }
+    },
+    SET_POST_TO_STAGE: (state, postToStage) => {
+      Vue.ls.set(POST_TO_STAGE, postToStage)
+      state.postToStage = postToStage
+    },
+    CLEAR_POST_TO_STAGE: state => {
+      Vue.ls.remove(POST_TO_STAGE)
+      state.postToStage = null
+    },
   },
   actions: {
     setSidebar({ commit }, type) {
@@ -123,6 +133,12 @@ const app = {
     },
     ToggleLoginModal({ commit }, show) {
       commit('TOGGLE_LOGIN_MODAL', show)
+    },
+    SetPostToStage({ commit }, postToStage) {
+      commit('SET_POST_TO_STAGE', postToStage)
+    },
+    ClearPostToStage({ commit }) {
+      commit('CLEAR_POST_TO_STAGE')
     }
   }
 }

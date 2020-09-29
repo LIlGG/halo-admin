@@ -104,14 +104,15 @@ export default {
       draftSaving: false,
       previewSaving: false,
       draftSavederrored: false,
+      timer: null
     }
   },
   beforeRouteEnter(to, from, next) {
     // Get post id from query
     const postId = to.query.postId
-    next((vm) => {
+    next(vm => {
       if (postId) {
-        postApi.get(postId).then((response) => {
+        postApi.get(postId).then(response => {
           const post = response.data.data
           vm.postToStage = post
           vm.selectedTagIds = post.tagIds
@@ -145,7 +146,7 @@ export default {
     } else {
       this.$confirm({
         title: '当前页面数据未保存，确定要离开吗？',
-        content: (h) => <div style="color:red;">如果离开当面页面，你的数据很可能会丢失！</div>,
+        content: () => <div style="color:red;">如果离开当面页面，你的数据很可能会丢失！</div>,
         onOk() {
           next()
         },
@@ -153,6 +154,12 @@ export default {
           next(false)
         },
       })
+    }
+  },
+  created() {
+    document.onkeyup = () => {
+      clearTimeout(this.timer)
+      this.timer = setTimeout(this.idleCallback, 5 * 1000)
     }
   },
   mounted() {
@@ -168,7 +175,7 @@ export default {
     // }
   },
   watch: {
-    temporaryContent: function(newValue, oldValue) {
+    temporaryContent: function(newValue) {
       if (newValue) {
         this.contentChanges++
       }
@@ -182,6 +189,8 @@ export default {
   },
   methods: {
     handleSaveDraft(draftOnly = false) {
+      clearTimeout(this.timer)
+      this.$store.dispatch('ClearPostToStage')
       this.$log.debug('Draft only: ' + draftOnly)
       this.postToStage.status = 'DRAFT'
       if (!this.postToStage.title) {
@@ -193,7 +202,7 @@ export default {
         if (draftOnly) {
           postApi
             .updateDraft(this.postToStage.id, this.postToStage.originalContent)
-            .then((response) => {
+            .then(() => {
               this.handleRestoreSavedStatus()
             })
             .catch(() => {
@@ -207,7 +216,7 @@ export default {
         } else {
           postApi
             .update(this.postToStage.id, this.postToStage, false)
-            .then((response) => {
+            .then(response => {
               this.postToStage = response.data.data
               this.handleRestoreSavedStatus()
             })
@@ -224,7 +233,7 @@ export default {
         // Create the post
         postApi
           .create(this.postToStage, false)
-          .then((response) => {
+          .then(response => {
             this.postToStage = response.data.data
             this.handleRestoreSavedStatus()
           })
@@ -239,6 +248,8 @@ export default {
       }
     },
     handlePreview() {
+      clearTimeout(this.timer)
+      this.$store.dispatch('ClearPostToStage')
       this.postToStage.status = 'DRAFT'
       if (!this.postToStage.title) {
         this.postToStage.title = datetimeFormat(new Date(), 'YYYY-MM-DD-HH-mm-ss')
@@ -246,11 +257,11 @@ export default {
       this.previewSaving = true
       if (this.postToStage.id) {
         // Update the post
-        postApi.update(this.postToStage.id, this.postToStage, false).then((response) => {
+        postApi.update(this.postToStage.id, this.postToStage, false).then(response => {
           this.$log.debug('Updated post', response.data.data)
           postApi
             .preview(this.postToStage.id)
-            .then((response) => {
+            .then(response => {
               window.open(response.data, '_blank')
               this.handleRestoreSavedStatus()
             })
@@ -262,12 +273,12 @@ export default {
         })
       } else {
         // Create the post
-        postApi.create(this.postToStage, false).then((response) => {
+        postApi.create(this.postToStage, false).then(response => {
           this.$log.debug('Created post', response.data.data)
           this.postToStage = response.data.data
           postApi
             .preview(this.postToStage.id)
-            .then((response) => {
+            .then(response => {
               window.open(response.data, '_blank')
               this.handleRestoreSavedStatus()
             })
@@ -297,6 +308,17 @@ export default {
     onRefreshPostMetasFromSetting(metas) {
       this.selectedMetas = metas
     },
-  },
+    idleCallback() {
+      if (!this.postToStage || this.postToStage.originalContent.length === 0) {
+        this.$store.dispatch('ClearPostToStage')
+        return
+      }
+      // 自动保存用户文章
+      this.$message.loading({ content: '自动保存中...', key: 'autosave' })
+      const postToStageToJson = JSON.stringify(this.postToStage)
+      this.$store.dispatch('SetPostToStage', postToStageToJson)
+      this.$message.success({ content: '自动保存成功!', key: 'autosave', duration: 1 })
+    }
+  }
 }
 </script>

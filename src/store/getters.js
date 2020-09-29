@@ -4,6 +4,7 @@ const getters = {
   color: state => state.app.color,
   layoutSetting: state => state.app.layoutSetting,
   loginModal: state => state.app.loginModal,
+  postToStage: state => state.app.postToStage,
   token: state => state.user.token,
   user: state => state.user.user,
   addRouters: state => state.permission.addRouters,

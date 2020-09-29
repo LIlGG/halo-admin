@@ -11,6 +11,7 @@ export const USER = 'USER'
 export const API_URL = 'API_URL'
 export const OPTIONS = 'OPTIONS'
 export const LAYOUT_SETTING = 'LAYOUT_SETTING'
+export const POST_TO_STAGE = 'POST_TO_STAGE'
 
 export const CONTENT_WIDTH_TYPE = {
   Fluid: 'Fluid',
